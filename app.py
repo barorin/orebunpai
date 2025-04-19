@@ -7,7 +7,7 @@ import plotly.graph_objects as go  # type: ignore
 import streamlit as st
 
 # アプリのタイトルとスタイルの設定
-st.set_page_config(page_title="会社法上の分配可能額計算アプリ", layout="wide")
+st.set_page_config(page_title="俺の分配可能額", page_icon="💰", layout="wide")
 
 # カスタムCSS
 st.markdown(
@@ -102,7 +102,7 @@ def format_currency_input(value):
 
 # アプリのメインタイトル
 st.markdown(
-    "<div class='main-header'>俺の分配可能額計算</div>",
+    "<div class='main-header'>俺の分配可能額</div>",
     unsafe_allow_html=True,
 )
 
