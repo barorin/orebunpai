@@ -121,7 +121,6 @@ st.sidebar.markdown(
    * 詳細モード：最終事業年度末日後の変動を考慮した詳細な計算
 
 2. **基本情報の入力**
-   * 会社名と最終事業年度末日を入力
    * 純資産の部の情報を入力
    * のれんや繰延資産がある場合はその金額を入力
 
@@ -166,15 +165,6 @@ with tabs[0]:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown(
-            "<div class='section-header'>会社の基本情報</div>", unsafe_allow_html=True
-        )
-
-        company_name = st.text_input("会社名")
-        fiscal_year_end = st.date_input(
-            "最終事業年度末日",
-        )
-
         st.markdown(
             "<div class='section-header'>純資産の部の情報（最終事業年度末日時点）</div>",
             unsafe_allow_html=True,
@@ -467,8 +457,6 @@ with tabs[0]:
                 "valuation_adjustments": valuation_adjustments,
                 "net_assets_adjustment": net_assets_adjustment,
                 "distributable_amount": distributable_amount,
-                "company_name": company_name,
-                "fiscal_year_end": fiscal_year_end,
                 "capital_stock": capital_stock,
                 "capital_reserve": capital_reserve,
                 "other_capital_surplus": other_capital_surplus,
@@ -506,9 +494,8 @@ with tabs[1]:
         st.markdown(
             f"""
         <div class='result-box'>
-            <h3>{st.session_state.results.get('company_name', '会社')}の分配可能額</h3>
+            <h3>分配可能額</h3>
             <h2 class='{"positive" if distributable_amount >= 0 else "negative"}'>{format_yen(distributable_amount)}</h2>
-            <p>最終事業年度末日: {fiscal_year_end_str}</p>
         </div>
         """,
             unsafe_allow_html=True,
