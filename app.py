@@ -608,7 +608,7 @@ with tabs[1]:
             for name, value, ref in other_adjustments:
                 st.markdown(
                     f"""
-                {name}: {format_yen(value)} <span class='{'positive' if value >= 0 else 'negative'}'>({'+'if value >= 0 else ''}{value:,})</span>
+                {name}: {format_yen(value)} <span class='{'positive' if value >= 0 else 'negative'}'></span>
                 <br><span class="reference">（{ref}）</span>
                 """,
                     unsafe_allow_html=True,
