@@ -48,7 +48,7 @@ def calculate_distributable_amount(
     dividend_adjustments = -(dividend_amount + dividend_reserve)
 
     # 3. 自己株式についての調整
-    treasury_stock_abs = abs(treasury_stock)
+    treasury_stock_abs = abs(treasury_stock) - disposal_treasury_stock
     additional_treasury_adjustments = -disposal_consideration
 
     # 4. 臨時決算に伴う調整
@@ -344,7 +344,7 @@ class TestDistributableAmount:
         assert result["treasury_stock_adjustments"] == -300000
         assert result["capital_reserve_adjustments"] == 2500000
         assert result["dividend_adjustments"] == -1650000
-        assert result["treasury_stock_abs"] == 3000000
+        assert result["treasury_stock_abs"] == 2000000
         assert result["additional_treasury_adjustments"] == -1200000
         assert result["interim_settlement_adjustments"] == 3300000
 
@@ -362,7 +362,7 @@ class TestDistributableAmount:
             - 300000  # 自己株式処分・消却修正
             + 2500000  # 資本金・準備金修正
             - 1650000  # 配当修正
-            - 3000000  # 自己株式帳簿価額
+            - 2000000  # 自己株式帳簿価額
             - 1200000  # 自己株式処分対価調整
             + 3300000  # 臨時決算調整
             - 0  # のれん等調整額控除

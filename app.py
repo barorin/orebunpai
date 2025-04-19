@@ -369,7 +369,7 @@ with tabs[0]:
             dividend_adjustments = -(dividend_amount + dividend_reserve)
 
             # 自己株式についての調整
-            treasury_stock_abs = abs(treasury_stock)
+            treasury_stock_abs = abs(treasury_stock) - disposal_treasury_stock
             additional_treasury_adjustments = -disposal_consideration
 
             # 臨時決算に伴う調整
