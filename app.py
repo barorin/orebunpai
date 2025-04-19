@@ -536,7 +536,7 @@ with tabs[1]:
 
                 for name, value in adjustments:
                     st.markdown(
-                        f"{name}: {format_yen(value)} <span class='{'positive' if value >= 0 else 'negative'}'>({'+'if value >= 0 else ''}{value:,})</span>",  # noqa
+                        f"{name}: {format_yen(value)} <span class='{'positive' if value >= 0 else 'negative'}'></span>",  # noqa
                         unsafe_allow_html=True,
                     )
 
