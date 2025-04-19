@@ -780,21 +780,46 @@ with tabs[2]:
 
         elif graph_type == "のれん等調整額の影響":
             # のれん等調整額の影響の積み上げ棒グラフ
-            goodwill_half = st.session_state.results.get("goodwill", 0) / 2
+            goodwill_half = int(st.session_state.results.get("goodwill", 0) / 2)
             deferred = st.session_state.results.get("deferred_assets", 0)
             deduction = st.session_state.results.get("goodwill_deferred_deduction", 0)
 
+            # 資本金と準備金の合計を取得
+            capital_stock = st.session_state.results.get("capital_stock", 0)
+            capital_reserve = st.session_state.results.get("capital_reserve", 0)
+            earned_reserve = st.session_state.results.get("earned_reserve", 0)
+            other_capital_surplus = st.session_state.results.get(
+                "other_capital_surplus", 0
+            )
+
+            # 資本金＋準備金の合計
+            capital_reserves_total = capital_stock + capital_reserve + earned_reserve
+
             df = pd.DataFrame(
                 {
-                    "項目": ["のれん等調整額", "実際の控除額"],
-                    "のれん÷2": [goodwill_half, 0],
-                    "繰延資産": [deferred, 0],
-                    "控除額": [0, deduction],
+                    "項目": ["資本金・準備金等", "のれん等調整額", "実際の控除額"],
+                    "資本金・準備金": [capital_reserves_total, 0, 0],
+                    "その他資本剰余金": [other_capital_surplus, 0, 0],
+                    "のれん÷2": [0, goodwill_half, 0],
+                    "繰延資産": [0, deferred, 0],
+                    "控除額": [0, 0, deduction],
                 }
             )
 
             fig = go.Figure(
                 data=[
+                    go.Bar(
+                        name="資本金・準備金",
+                        x=df["項目"],
+                        y=df["資本金・準備金"],
+                        marker_color="#81C784",
+                    ),
+                    go.Bar(
+                        name="その他資本剰余金",
+                        x=df["項目"],
+                        y=df["その他資本剰余金"],
+                        marker_color="#4CAF50",
+                    ),
                     go.Bar(
                         name="のれん÷2",
                         x=df["項目"],
@@ -817,22 +842,99 @@ with tabs[2]:
             )
 
             fig.update_layout(
-                title="のれん等調整額と実際の控除額の比較",
+                title="のれん等調整額と資本金・準備金の比較",
                 barmode="stack",
                 yaxis_title="金額（円）",
             )
 
             st.plotly_chart(fig, use_container_width=True)
 
-            st.markdown(
-                """
-            <div class='info-box'>
-            のれん等調整額（のれん÷2＋繰延資産）は、資本金・準備金を超える部分のみ分配可能額から控除されます。
-            のれんの控除額は、その他資本剰余金の額を上限とします。
-            </div>
-            """,
-                unsafe_allow_html=True,
-            )
+            # 計算過程の説明
+            # 該当するパターンを特定
+            goodwill_deferred_total = goodwill_half + deferred
+            if goodwill_deferred_total <= capital_reserves_total:
+                pattern = "パターン1"
+            elif (
+                goodwill_deferred_total
+                <= capital_reserves_total + other_capital_surplus
+            ):
+                pattern = "パターン2"
+            elif goodwill_half <= capital_reserves_total + other_capital_surplus:
+                pattern = "パターン3"
+            else:
+                pattern = "パターン4"
+
+            # パターンごとの詳細説明
+            if pattern == "パターン1":
+                st.markdown(
+                    f"""
+                <div class='info-box'>
+                <p><strong>■ のれん等調整額の計算結果</strong></p>
+                <p>のれん等調整額（{format_yen(goodwill_deferred_total)}）が資本金・準備金の合計（{format_yen(capital_reserves_total)}）以下のため、<span class="positive">控除は不要</span>です。</p>
+
+                <p><strong>■ 計算過程</strong></p>
+                <p>{format_yen(goodwill_deferred_total)} ≤ {format_yen(capital_reserves_total)} なので、控除額 = 0円</p>
+
+                <p><strong>■ 解説</strong></p>
+                <p>のれん等調整額が資本金・準備金の合計額の範囲内に収まっているため、分配可能額からの控除は発生しません。この場合、のれんや繰延資産があっても分配可能額への影響はありません。</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+            elif pattern == "パターン2":
+                excess_amount = goodwill_deferred_total - capital_reserves_total
+                st.markdown(
+                    f"""
+                <div class='info-box'>
+                <p><strong>■ のれん等調整額の計算結果</strong></p>
+                <p>のれん等調整額（{format_yen(goodwill_deferred_total)}）が資本金・準備金の合計（{format_yen(capital_reserves_total)}）を超えていますが、資本金・準備金の合計とその他資本剰余金の合計（{format_yen(capital_reserves_total + other_capital_surplus)}）以下です。</p>
+
+                <p><strong>■ 計算過程</strong></p>
+                <p>控除額 = のれん等調整額 - 資本金・準備金の合計</p>
+                <p>控除額 = {format_yen(goodwill_deferred_total)} - {format_yen(capital_reserves_total)} = {format_yen(excess_amount)}</p>
+
+                <p><strong>■ 解説</strong></p>
+                <p>のれん等調整額のうち、資本金・準備金の合計を超える部分（{format_yen(excess_amount)}）だけが分配可能額から控除されます。この金額は分配不可となります。</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+            elif pattern == "パターン3":
+                excess_amount = goodwill_deferred_total - capital_reserves_total
+                st.markdown(
+                    f"""
+                <div class='info-box'>
+                <p><strong>■ のれん等調整額の計算結果</strong></p>
+                <p>のれん等調整額（{format_yen(goodwill_deferred_total)}）が資本金・準備金の合計（{format_yen(capital_reserves_total)}）を超えていますが、のれんの半額が資本金・準備金の合計とその他資本剰余金の合計（{format_yen(capital_reserves_total + other_capital_surplus)}）以下です。</p>
+
+                <p><strong>■ 計算過程</strong></p>
+                <p>控除額 = のれん等調整額 - 資本金・準備金の合計</p>
+                <p>控除額 = {format_yen(goodwill_deferred_total)} - {format_yen(capital_reserves_total)} = {format_yen(excess_amount)}</p>
+
+                <p><strong>■ 解説</strong></p>
+                <p>のれん等調整額のうち、資本金・準備金の合計を超える部分（{format_yen(excess_amount)}）が分配可能額から控除されます。この場合、のれんは資本剰余金の範囲内で処理できるため、超過分だけが控除対象となります。</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
+            else:  # パターン4
+                final_deduction = other_capital_surplus + deferred
+                st.markdown(
+                    f"""
+                <div class='info-box'>
+                <p><strong>■ のれん等調整額の計算結果</strong></p>
+                <p>のれんの半額（{format_yen(goodwill_half)}）が資本金・準備金の合計とその他資本剰余金の合計（{format_yen(capital_reserves_total + other_capital_surplus)}）を超えています。</p>
+
+                <p><strong>■ 計算過程</strong></p>
+                <p>控除額 = その他資本剰余金 + 繰延資産の額</p>
+                <p>控除額 = {format_yen(other_capital_surplus)} + {format_yen(deferred)} = {format_yen(final_deduction)}</p>
+
+                <p><strong>■ 解説</strong></p>
+                <p>この場合、のれんの控除額はその他資本剰余金を上限とし、それに繰延資産の全額を加えた金額（{format_yen(final_deduction)}）が分配可能額から控除されます。のれんの一部は資本金・準備金でカバーされるため、控除対象はその他資本剰余金の範囲内となります。</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
 
         elif graph_type == "分配可能額のウォーターフォールチャート":
             # 分配可能額の計算過程をウォーターフォールチャートで表示
