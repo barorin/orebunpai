@@ -114,8 +114,7 @@ calculation_mode = st.sidebar.radio(
 # サイドバーの使い方ガイド
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 使い方ガイド")
-st.sidebar.markdown(
-    """
+st.sidebar.markdown("""
 1. **計算モードの選択**
    * 基本モード：主要項目のみで計算
    * 詳細モード：最終事業年度末日後の変動を考慮した詳細な計算
@@ -131,18 +130,15 @@ st.sidebar.markdown(
 4. **結果の確認**
    * 分配可能額の総額と計算過程の詳細を確認
    * グラフ表示タブで視覚的な分析を確認
-"""
-)
+""")
 
 # サイドバーの注意事項
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 注意事項")
-st.sidebar.markdown(
-    """
+st.sidebar.markdown("""
     * 計算結果はあくまで参考値です。
     * 実際の配当や自己株式取得を行う際は、専門家に相談してください。
-"""
-)
+""")
 
 # 初期値の設定（自動計算用）
 if "results" not in st.session_state:
@@ -644,7 +640,8 @@ with tabs[1]:
                 """
             <div class='warning-box'>
             この分配可能額の範囲内で、配当や自己株式の有償取得を行うことが可能です。
-            計算結果を実際の経営判断に利用する際は、専門家への相談をお勧めします。
+            なお、計算結果はあくまで参考値です。
+            計算結果を実際の経営判断に利用する際は、専門家へ相談してください。
             </div>
             """,
                 unsafe_allow_html=True,
